@@ -1,0 +1,13 @@
+<api-colorpicker>
+    <!-- SCRIPT's MAIN's -->
+    <script src = 'colorpicker.lua' type = 'client' cache = 'false'/>
+    <!-- SCRIPT's POO's -->
+    <oop>true</oop>
+    <!-- ASSET's IMAGE's -->
+    <file src = 'assets/images/cursor.png'/>
+
+    <file src = 'assets/images/full.png'/>
+    <file src = 'assets/images/default.png'/>
+    <!-- VERSION's RESOURCE's -->
+    <min_mta_version client = '1.5.4'/>
+</api-colorpicker>
