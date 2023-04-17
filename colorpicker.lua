@@ -20,6 +20,7 @@ local instance = { };
 
 instance.total = 0;
 
+instance.hover = false;
 instance.actual = false;
 instance.events = false;
 
@@ -31,7 +32,7 @@ instance.types = {
 }
 
 -- event's resource's
-local function onClick (button, state)
+function onClick (button, state)
     if not instance.events then
         return false;
     end
@@ -40,9 +41,10 @@ local function onClick (button, state)
         return false;
     end
 
-    local self = instance.actual;
-
+    
     if state == 'up' then
+        local self = instance.actual;
+        
         if not self or type (self) ~= 'table' then
             return false;
         end
@@ -52,21 +54,18 @@ local function onClick (button, state)
         end
 
         instance.actual = false;
-
         self.settings.moving = false;
 
         return true;
     end
 
     if state == 'down' then
-        for key, value in pairs (instance.elements) do
-            if isCursorOnElement (value.x, value.y, value.width, value.height) then
-                instance.actual = value;
-                value.settings.moving = true;
-
-                break;
-            end
+        if not instance.hover then
+            return false;
         end
+
+        instance.actual = instance.hover;
+        instance.hover.settings.moving = true;
 
         return true;
     end
@@ -76,10 +75,6 @@ end
 
 -- method's resource's
 function Colorpicker:render ()
-    if not self or type (self) ~= 'table' then
-        return false;
-    end
-
     if self.animation and not (type (self.animation) ~= 'table') then
         self.animation.alpha = interpolateBetween (self.animation.from, 0, 0, self.animation.to, 0, 0, (getTickCount () - self.animation.tick) / self.animation.time, 'Linear');
     end
@@ -100,6 +95,14 @@ function Colorpicker:render ()
         self.settings.moving = false;
 
         instance.actual = false;
+    end
+
+    if isCursorOnElement (self.x, self.y, self.width, self.height) then
+        instance.hover = self;
+    else
+        if instance.hover and not (instance.hover ~= self) then
+            instance.hover = false;
+        end
     end
 
     dxDrawImage (self.x, self.y, self.width, self.height, instance.types[self.type], 0, 0, 0, tocolor (255, 255, 255, self.animation.alpha or 255), self.postGUI);
@@ -157,12 +160,12 @@ function Colorpicker:create (x, y, width, height, cursor, style, animation, call
 end
 
 function Colorpicker:destroy ()
-    if not self or type (self) ~= 'table' then
-        return false;
-    end
-
     if instance.actual == self then
         instance.actual = false;
+    end
+
+    if instance.hover == self then
+        instance.hover = false;
     end
 
     instance.total = instance.total - 1;
@@ -178,15 +181,11 @@ function Colorpicker:destroy ()
 end
 
 function Colorpicker:getColor ()
-    if not self or type (self) ~= 'table' then
-        return false;
-    end
-
     return self.settings.color;
 end
 
 function Colorpicker:setAnimation (animation)
-    if not self or type (self) ~= 'table' then
+    if not animation or type (animation) ~= 'table' then
         return false;
     end
 
